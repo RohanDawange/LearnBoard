@@ -50,6 +50,166 @@
 
   #root { width: 100%; height: 100%; display: flex; flex-direction: column; }
 
+
+  /* ── SPLASH SCREEN ── */
+  #splash-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: #0a0b0d;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 28px;
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+  #splash-overlay.hide {
+    opacity: 0;
+    transform: scale(1.04);
+    pointer-events: none;
+  }
+
+  .splash-logo-wrap {
+    position: relative;
+    width: 180px;
+    height: 180px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* spinning ring behind logo */
+  .splash-ring {
+    position: absolute;
+    inset: -12px;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    border-top-color: #f97316;
+    border-right-color: rgba(249,115,22,0.3);
+    animation: ring-spin 1.8s linear infinite;
+  }
+  .splash-ring-2 {
+    position: absolute;
+    inset: -22px;
+    border-radius: 50%;
+    border: 1px solid transparent;
+    border-bottom-color: rgba(249,115,22,0.5);
+    border-left-color: rgba(249,115,22,0.2);
+    animation: ring-spin 3s linear infinite reverse;
+  }
+  .splash-ring-3 {
+    position: absolute;
+    inset: -34px;
+    border-radius: 50%;
+    border: 1px dashed rgba(249,115,22,0.15);
+    animation: ring-spin 8s linear infinite;
+  }
+
+  @keyframes ring-spin { to { transform: rotate(360deg); } }
+
+  /* glow pulse behind logo */
+  .splash-glow {
+    position: absolute;
+    inset: -20px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(249,115,22,0.18) 0%, transparent 70%);
+    animation: glow-pulse 2s ease-in-out infinite;
+  }
+  @keyframes glow-pulse {
+    0%, 100% { opacity: 0.6; transform: scale(1); }
+    50%       { opacity: 1;   transform: scale(1.12); }
+  }
+
+  .splash-logo-img {
+    width: 160px;
+    height: 160px;
+    object-fit: contain;
+    position: relative;
+    z-index: 2;
+    animation: splash-logo-in 0.9s cubic-bezier(0.34,1.56,0.64,1) both;
+    animation-delay: 0.1s;
+    filter: drop-shadow(0 0 20px rgba(249,115,22,0.4));
+  }
+  @keyframes splash-logo-in {
+    0%   { opacity: 0; transform: scale(0.3) rotate(-30deg); }
+    100% { opacity: 1; transform: scale(1) rotate(0deg); }
+  }
+
+  .splash-title {
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 700;
+    font-size: 2.6rem;
+    letter-spacing: 8px;
+    text-transform: uppercase;
+    color: #f97316;
+    text-shadow: 0 0 30px rgba(249,115,22,0.6), 0 0 60px rgba(249,115,22,0.2);
+    animation: splash-title-in 0.7s ease both;
+    animation-delay: 0.4s;
+    opacity: 0;
+  }
+  @keyframes splash-title-in {
+    0%   { opacity: 0; transform: translateY(16px); filter: blur(8px); }
+    100% { opacity: 1; transform: translateY(0);   filter: blur(0); }
+  }
+
+  .splash-sub {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 4px;
+    color: #3a3f4a;
+    text-transform: uppercase;
+    animation: splash-title-in 0.7s ease both;
+    animation-delay: 0.7s;
+    opacity: 0;
+  }
+
+  .splash-bar {
+    width: 200px;
+    height: 2px;
+    background: #1e2128;
+    border-radius: 2px;
+    overflow: hidden;
+    animation: splash-title-in 0.4s ease both;
+    animation-delay: 0.9s;
+    opacity: 0;
+  }
+  .splash-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #f97316, #fbbf24);
+    border-radius: 2px;
+    animation: bar-fill 1.4s cubic-bezier(0.4,0,0.2,1) both;
+    animation-delay: 1s;
+    width: 0%;
+  }
+  @keyframes bar-fill {
+    0%   { width: 0%; box-shadow: none; }
+    80%  { width: 100%; }
+    100% { width: 100%; box-shadow: 0 0 12px rgba(249,115,22,0.6); }
+  }
+
+  .splash-particles {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    overflow: hidden;
+  }
+  .spark {
+    position: absolute;
+    width: 3px; height: 3px;
+    border-radius: 50%;
+    background: #f97316;
+    animation: spark-float linear infinite;
+    opacity: 0;
+  }
+  @keyframes spark-float {
+    0%   { transform: translateY(100vh) scale(0); opacity: 0; }
+    10%  { opacity: 1; }
+    90%  { opacity: 0.6; }
+    100% { transform: translateY(-20px) scale(1.5); opacity: 0; }
+  }
+
+
   /* ── TOPBAR ── */
   .topbar {
     height: 48px;
@@ -79,11 +239,22 @@
     text-shadow: 0 0 20px rgba(249,115,22,0.5);
   }
   .logo-icon {
-    width: 22px; height: 22px;
-    background: var(--orange);
-    clip-path: polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%);
+    width: 36px; height: 36px;
     flex-shrink: 0;
-    box-shadow: 0 0 12px rgba(249,115,22,0.6);
+    border-radius: 6px;
+    overflow: hidden;
+    filter: drop-shadow(0 0 8px rgba(249,115,22,0.5));
+    animation: logo-spin-entry 1.2s cubic-bezier(0.34,1.56,0.64,1) both;
+  }
+  .logo-icon img {
+    width: 100%; height: 100%;
+    object-fit: contain;
+    display: block;
+  }
+  @keyframes logo-spin-entry {
+    0%   { transform: rotate(-180deg) scale(0); opacity: 0; filter: drop-shadow(0 0 0px rgba(249,115,22,0)); }
+    60%  { filter: drop-shadow(0 0 20px rgba(249,115,22,0.9)); }
+    100% { transform: rotate(0deg) scale(1); opacity: 1; filter: drop-shadow(0 0 8px rgba(249,115,22,0.5)); }
   }
   .logo-sep {
     width: 1px; height: 20px;
@@ -538,555 +709,79 @@
     background: var(--bg3);
     white-space: nowrap;
   }
+
+  /* ── VIDEO ERROR & LOADING ── */
+  .embed-error-box {
+    width: 100%; height: 100%;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 14px; padding: 24px;
+    background: #0d0f14;
+    text-align: center;
+  }
+  .embed-error-icon { opacity: 0.9; }
+  .embed-error-title {
+    font-family: var(--head);
+    font-size: 1.1rem; font-weight: 700;
+    color: #f97316; letter-spacing: 1px;
+  }
+  .embed-error-msg {
+    font-family: var(--mono);
+    font-size: 0.72rem; color: #6b7280;
+    line-height: 1.7;
+  }
+  .embed-error-thumb {
+    width: 180px; border-radius: 6px; overflow: hidden;
+    border: 1px solid #1e2128;
+  }
+  .embed-error-thumb img { width: 100%; display: block; }
+  .embed-open-btn {
+    display: flex; align-items: center;
+    gap: 6px;
+    background: #f97316; color: #000;
+    border: none; border-radius: 6px;
+    padding: 8px 18px;
+    font-family: var(--head); font-weight: 700;
+    font-size: 0.9rem; letter-spacing: 1px;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+  }
+  .embed-open-btn:hover { background: #fb923c; transform: scale(1.03); }
+  .embed-retry-btn {
+    background: transparent; color: #3a3f4a;
+    border: 1px solid #1e2128; border-radius: 4px;
+    padding: 4px 14px;
+    font-family: var(--mono); font-size: 0.65rem;
+    cursor: pointer; transition: color 0.2s, border-color 0.2s;
+  }
+  .embed-retry-btn:hover { color: #f97316; border-color: rgba(249,115,22,0.4); }
+
+  .video-loading {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 14px; background: #0d0f14; z-index: 10;
+  }
+  .vl-spinner {
+    width: 36px; height: 36px;
+    border: 3px solid #1e2128;
+    border-top-color: #f97316;
+    border-radius: 50%;
+    animation: ring-spin 0.8s linear infinite;
+  }
+  .vl-text {
+    font-family: var(--mono); font-size: 0.65rem;
+    color: #3a3f4a; letter-spacing: 2px;
+  }
+
 </style>
 </head>
 <body>
-<div id="root"></div>
-
-<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-
-<script type="text/babel">
-const { useState, useEffect, useRef, useCallback } = React;
-
-// ─── UTILS ───────────────────────────────────────────
-function extractVideoId(url) {
-  const patterns = [
-    /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/|youtube\.com\/shorts\/)([^&?/\s]+)/,
-  ];
-  for (const p of patterns) {
-    const m = url.match(p);
-    if (m) return m[1];
-  }
-  return null;
-}
-
-function fmtTimer(s) {
-  const h = Math.floor(s / 3600);
-  const m = Math.floor((s % 3600) / 60);
-  const sec = s % 60;
-  if (h > 0) return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;
-  return `${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;
-}
-
-// ─── STORAGE ─────────────────────────────────────────
-const LS_VIDEO = 'learnboard_video_v2';
-function loadSavedVideo() {
-  try { return localStorage.getItem(LS_VIDEO) || ''; } catch { return ''; }
-}
-function saveVideo(url) {
-  try { localStorage.setItem(LS_VIDEO, url); } catch {}
-}
-
-// ─── TIMER ───────────────────────────────────────────
-function Timer() {
-  const [seconds, setSeconds] = useState(0);
-  const [running, setRunning] = useState(false);
-  const interval = useRef(null);
-
-  useEffect(() => {
-    if (running) {
-      interval.current = setInterval(() => setSeconds(s => s + 1), 1000);
-    } else {
-      clearInterval(interval.current);
-    }
-    return () => clearInterval(interval.current);
-  }, [running]);
-
-  const toggle = () => setRunning(r => !r);
-  const reset  = () => { setRunning(false); setSeconds(0); };
-
-  return (
-    <div className="timer-block">
-      <div className={`timer-digits${running ? '' : ' paused'}`}>{fmtTimer(seconds)}</div>
-      <div className="timer-btns">
-        <button
-          className={`timer-btn${running ? ' running' : ''}`}
-          onClick={toggle}
-          title={running ? 'Pause' : 'Start'}
-        >
-          {running
-            ? <svg width="10" height="10" viewBox="0 0 10 10"><rect x="1" y="1" width="3" height="8" fill="currentColor"/><rect x="6" y="1" width="3" height="8" fill="currentColor"/></svg>
-            : <svg width="10" height="10" viewBox="0 0 10 10"><polygon points="1,0 10,5 1,10" fill="currentColor"/></svg>
-          }
-        </button>
-        <button className="timer-btn reset-btn" onClick={reset} title="Reset">
-          <svg width="10" height="10" viewBox="0 0 12 12">
-            <path d="M6 2a4 4 0 1 0 3.5 6" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
-            <polyline points="9,1 9,4 6,4" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
-        </button>
-      </div>
-    </div>
-  );
-}
-
-// ─── NOTEPAD ─────────────────────────────────────────
-const LS_NOTES = 'learnboard_notes_v3';
-
-function loadNotes() {
-  try {
-    const raw = localStorage.getItem(LS_NOTES);
-    return raw ? JSON.parse(raw) : [{ id: 1, title: 'Note 1', body: '' }];
-  } catch { return [{ id: 1, title: 'Note 1', body: '' }]; }
-}
-function persistNotes(tabs) {
-  try { localStorage.setItem(LS_NOTES, JSON.stringify(tabs)); } catch {}
-}
-
-function Notepad() {
-  const [tabs,     setTabs]     = useState(() => loadNotes());
-  const [activeId, setActiveId] = useState(() => loadNotes()[0]?.id ?? 1);
-  const [savedDot, setSavedDot] = useState(false);
-  const saveTimer = useRef(null);
-  const nextId    = useRef(Math.max(...loadNotes().map(t => t.id)) + 1);
-
-  useEffect(() => {
-    clearTimeout(saveTimer.current);
-    saveTimer.current = setTimeout(() => {
-      persistNotes(tabs);
-      setSavedDot(true);
-      setTimeout(() => setSavedDot(false), 1400);
-    }, 500);
-  }, [tabs]);
-
-  const activeTab = tabs.find(t => t.id === activeId) || tabs[0];
-
-  function updateBody(val) {
-    setTabs(prev => prev.map(t => t.id === activeId ? { ...t, body: val } : t));
-  }
-
-  function addTab() {
-    const id = nextId.current++;
-    const label = `Note ${tabs.length + 1}`;
-    setTabs(prev => [...prev, { id, title: label, body: '' }]);
-    setActiveId(id);
-  }
-
-  function deleteTab(id, e) {
-    e.stopPropagation();
-    setTabs(prev => {
-      const next = prev.filter(t => t.id !== id);
-      if (next.length === 0) {
-        const fresh = { id: nextId.current++, title: 'Note 1', body: '' };
-        setActiveId(fresh.id);
-        return [fresh];
-      }
-      if (activeId === id) setActiveId(next[next.length - 1].id);
-      return next;
-    });
-  }
-
-  function clearCurrent() {
-    if (!activeTab?.body.trim()) return;
-    if (!confirm('Clear this note?')) return;
-    updateBody('');
-  }
-
-  function downloadTxt() {
-    const body = activeTab?.body ?? '';
-    const title = activeTab?.title ?? 'note';
-    const blob = new Blob([body], { type: 'text/plain;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${title.replace(/\s+/g, '_')}.txt`;
-    a.click();
-    URL.revokeObjectURL(url);
-  }
-
-  function downloadAllTxt() {
-    const content = tabs.map(t => `=== ${t.title} ===\n\n${t.body}`).join('\n\n\n');
-    const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'learnboard_notes.txt';
-    a.click();
-    URL.revokeObjectURL(url);
-  }
-
-  function downloadPdf() {
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-    const title = activeTab?.title ?? 'Note';
-    const body  = activeTab?.body  ?? '';
-
-    const pageW  = doc.internal.pageSize.getWidth();
-    const pageH  = doc.internal.pageSize.getHeight();
-    const margin = 18;
-    const usableW = pageW - margin * 2;
-    let y = margin;
-
-    // ── background
-    doc.setFillColor(13, 15, 20);
-    doc.rect(0, 0, pageW, pageH, 'F');
-
-    // ── orange accent bar at top
-    doc.setFillColor(249, 115, 22);
-    doc.rect(0, 0, pageW, 8, 'F');
-
-    // ── header box
-    doc.setFillColor(17, 19, 24);
-    doc.rect(0, 8, pageW, 22, 'F');
-
-    // ── LearnBoard brand text
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(9);
-    doc.setTextColor(249, 115, 22);
-    doc.text('LEARNBOARD', margin, 16);
-
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(7);
-    doc.setTextColor(90, 98, 117);
-    doc.text(`Generated: ${new Date().toLocaleString()}`, margin, 22);
-
-    // ── Note title
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(18);
-    doc.setTextColor(232, 220, 200);
-    doc.text(title, margin, 36);
-
-    // ── divider line
-    y = 42;
-    doc.setDrawColor(249, 115, 22);
-    doc.setLineWidth(0.4);
-    doc.line(margin, y, pageW - margin, y);
-
-    y = 50;
-
-    // ── ruled line helper
-    const drawRuledLines = (fromY, toY) => {
-      doc.setDrawColor(30, 35, 48);
-      doc.setLineWidth(0.15);
-      for (let ly = fromY; ly < toY; ly += 7) {
-        doc.line(margin, ly, pageW - margin, ly);
-      }
-    };
-
-    // ── body text — split into lines with wrapping
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(11);
-    doc.setTextColor(212, 216, 224);
-
-    const paragraphs = body.split('\n');
-
-    for (let i = 0; i < paragraphs.length; i++) {
-      const para = paragraphs[i];
-
-      // if empty line — add spacing
-      if (!para.trim()) {
-        y += 5;
-        if (y > pageH - margin) {
-          doc.addPage();
-          doc.setFillColor(13, 15, 20);
-          doc.rect(0, 0, pageW, pageH, 'F');
-          y = margin + 10;
-        }
-        continue;
-      }
-
-      // wrap long lines
-      const lines = doc.splitTextToSize(para, usableW);
-      for (const line of lines) {
-        if (y > pageH - margin - 5) {
-          // new page
-          doc.addPage();
-          doc.setFillColor(13, 15, 20);
-          doc.rect(0, 0, pageW, pageH, 'F');
-          // orange left margin line
-          doc.setDrawColor(249, 115, 22, 0.3);
-          doc.setLineWidth(0.3);
-          doc.line(margin - 4, 10, margin - 4, pageH - 10);
-          drawRuledLines(15, pageH - margin);
-          y = margin + 10;
-        }
-        doc.text(line, margin, y);
-        y += 7;
-      }
-    }
-
-    // draw ruled lines on first page content area
-    // (we do this last so it doesn't cover text — use a subtle approach)
-    // Add page numbers
-    const totalPages = doc.internal.getNumberOfPages();
-    for (let p = 1; p <= totalPages; p++) {
-      doc.setPage(p);
-      doc.setFont('helvetica', 'normal');
-      doc.setFontSize(7);
-      doc.setTextColor(58, 63, 74);
-      doc.text(`${title}  ·  Page ${p} of ${totalPages}`, margin, pageH - 6);
-      doc.setDrawColor(30, 33, 40);
-      doc.setLineWidth(0.3);
-      doc.line(margin, pageH - 10, pageW - margin, pageH - 10);
-    }
-
-    doc.save(`${title.replace(/\s+/g, '_')}.pdf`);
-  }
-
-  function downloadAllPdf() {
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-    const pageW = doc.internal.pageSize.getWidth();
-    const pageH = doc.internal.pageSize.getHeight();
-    const margin = 18;
-    const usableW = pageW - margin * 2;
-
-    tabs.forEach((tab, tabIdx) => {
-      if (tabIdx > 0) doc.addPage();
-
-      // bg
-      doc.setFillColor(13, 15, 20);
-      doc.rect(0, 0, pageW, pageH, 'F');
-
-      // top bar
-      doc.setFillColor(249, 115, 22);
-      doc.rect(0, 0, pageW, 8, 'F');
-
-      // header
-      doc.setFillColor(17, 19, 24);
-      doc.rect(0, 8, pageW, 22, 'F');
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(9);
-      doc.setTextColor(249, 115, 22);
-      doc.text('LEARNBOARD', margin, 16);
-      doc.setFont('helvetica', 'normal');
-      doc.setFontSize(7);
-      doc.setTextColor(90, 98, 117);
-      doc.text(`Note ${tabIdx + 1} of ${tabs.length}  ·  ${new Date().toLocaleDateString()}`, margin, 22);
-
-      // title
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(18);
-      doc.setTextColor(232, 220, 200);
-      doc.text(tab.title, margin, 36);
-
-      doc.setDrawColor(249, 115, 22);
-      doc.setLineWidth(0.4);
-      doc.line(margin, 42, pageW - margin, 42);
-
-      let y = 50;
-      doc.setFont('helvetica', 'normal');
-      doc.setFontSize(11);
-      doc.setTextColor(212, 216, 224);
-
-      const paragraphs = tab.body.split('\n');
-      for (const para of paragraphs) {
-        if (!para.trim()) { y += 5; continue; }
-        const lines = doc.splitTextToSize(para, usableW);
-        for (const line of lines) {
-          if (y > pageH - margin - 5) {
-            doc.addPage();
-            doc.setFillColor(13, 15, 20);
-            doc.rect(0, 0, pageW, pageH, 'F');
-            y = margin + 10;
-          }
-          doc.text(line, margin, y);
-          y += 7;
-        }
-      }
-    });
-
-    // page numbers
-    const totalPages = doc.internal.getNumberOfPages();
-    for (let p = 1; p <= totalPages; p++) {
-      doc.setPage(p);
-      doc.setFontSize(7);
-      doc.setTextColor(58, 63, 74);
-      doc.text(`LearnBoard Notes  ·  Page ${p} of ${totalPages}`, margin, pageH - 6);
-    }
-
-    doc.save('learnboard_all_notes.pdf');
-  }
-
-  const wordCount = activeTab?.body.trim() ? activeTab.body.trim().split(/\s+/).length : 0;
-  const lineCount = activeTab?.body ? activeTab.body.split('\n').length : 0;
-
-  return (
-    <div className="notepad-pane">
-      {/* Header */}
-      <div className="notepad-header">
-        <div className="notepad-header-title">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-            <polyline points="14,2 14,8 20,8"/>
-            <line x1="16" y1="13" x2="8" y2="13"/>
-            <line x1="16" y1="17" x2="8" y2="17"/>
-            <polyline points="10,9 9,9 8,9"/>
-          </svg>
-          Notepad
-        </div>
-        <span style={{flex:1}} />
-        <button className="np-btn np-btn-pdf" onClick={downloadAllPdf} title="Download all notes as PDF">
-          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-            <polyline points="14,2 14,8 20,8"/>
-          </svg>
-          ALL PDF
-        </button>
-        <button className="np-btn np-btn-download" onClick={downloadAllTxt} title="Download all notes as TXT">
-          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-            <polyline points="7,10 12,15 17,10"/>
-            <line x1="12" y1="15" x2="12" y2="3"/>
-          </svg>
-          ALL TXT
-        </button>
-      </div>
-
-      {/* Tabs */}
-      <div className="notepad-tabs">
-        {tabs.map(tab => (
-          <button
-            key={tab.id}
-            className={`np-tab${tab.id === activeId ? ' active' : ''}`}
-            onClick={() => setActiveId(tab.id)}
-          >
-            {tab.title}
-            {tabs.length > 1 && (
-              <span className="np-tab-x" onClick={e => deleteTab(tab.id, e)}>✕</span>
-            )}
-          </button>
-        ))}
-        <button className="np-tab-add" onClick={addTab} title="New tab">＋</button>
-      </div>
-
-      {/* Writing area */}
-      <div className="notepad-body">
-        <textarea
-          key={activeId}
-          className="np-textarea"
-          value={activeTab?.body ?? ''}
-          onChange={e => updateBody(e.target.value)}
-          placeholder={"Write your notes here...\n\nYour handwriting, your thoughts."}
-          spellCheck={false}
-        />
-      </div>
-
-      {/* Footer */}
-      <div className="notepad-footer">
-        <div className={`np-save-dot${savedDot ? ' saved' : ''}`} />
-        <span className="np-meta"><span>{wordCount}</span> words · <span>{lineCount}</span> lines</span>
-        <div className="np-actions">
-          <button className="np-btn np-btn-pdf" onClick={downloadPdf} title="Download as PDF">
-            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-              <polyline points="14,2 14,8 20,8"/>
-            </svg>
-            PDF
-          </button>
-          <button className="np-btn np-btn-download" onClick={downloadTxt} title="Download as TXT">
-            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-              <polyline points="7,10 12,15 17,10"/>
-              <line x1="12" y1="15" x2="12" y2="3"/>
-            </svg>
-            TXT
-          </button>
-          <button className="np-btn np-btn-clear" onClick={clearCurrent}>CLEAR</button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ─── VIDEO PANE ──────────────────────────────────────
-function VideoPane({ videoId, videoUrl }) {
-  return (
-    <div className="video-pane">
-      <div className="video-embed">
-        {videoId ? (
-          <iframe
-            src={`https://www.youtube.com/embed/${videoId}?autoplay=0&rel=0&modestbranding=1`}
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-            title="LearnBoard Video"
-          />
-        ) : (
-          <div className="video-placeholder">
-            <div className="placeholder-art">
-              <div className="play-triangle" />
-            </div>
-            <div className="placeholder-label">
-              Paste a YouTube URL above<br />
-              <strong>and press LOAD →</strong>
-            </div>
-          </div>
-        )}
-      </div>
-      <div className="video-footer">
-        <div className={`vf-dot${videoId ? ' live' : ''}`} />
-        <div className="vf-label">
-          {videoId ? `youtube.com/watch?v=${videoId}` : 'NO VIDEO LOADED'}
-        </div>
-        <div className="status-badge">{videoId ? 'ACTIVE' : 'IDLE'}</div>
-      </div>
-    </div>
-  );
-}
-
-// ─── APP ─────────────────────────────────────────────
-function App() {
-  const [urlInput, setUrlInput] = useState(() => loadSavedVideo());
-  const [videoId,  setVideoId]  = useState(() => {
-    const saved = loadSavedVideo();
-    return saved ? extractVideoId(saved) : null;
-  });
-
-  function handleLoad(e) {
-    e && e.preventDefault();
-    const id = extractVideoId(urlInput.trim());
-    if (!id) {
-      alert('Could not find a YouTube video ID in that URL.\nPlease paste a valid YouTube link.');
-      return;
-    }
-    setVideoId(id);
-    saveVideo(urlInput.trim());
-  }
-
-  return (
-    <>
-      {/* TOPBAR */}
-      <header className="topbar">
-        <div className="logo">
-          <div className="logo-icon" />
-          LearnBoard
-        </div>
-        <div className="logo-sep" />
-
-        {/* URL Form */}
-        <form className="url-form" onSubmit={handleLoad}>
-          <input
-            className="url-input"
-            type="text"
-            value={urlInput}
-            onChange={e => setUrlInput(e.target.value)}
-            placeholder="Paste YouTube URL → youtube.com/watch?v=..."
-            spellCheck={false}
-          />
-          <button className="btn-load" type="submit">LOAD →</button>
-        </form>
-
-        {/* Right side */}
-        <div className="topbar-right">
-          <Timer />
-        </div>
-      </header>
-
-      {/* WORKSPACE */}
-      <main className="workspace">
-        <VideoPane videoId={videoId} videoUrl={urlInput} />
-        <Notepad />
-      </main>
-    </>
-  );
-}
-
-// ─── MOUNT ───────────────────────────────────────────
-const root = ReactDOM.createRoot(document.getElementById('root'));
-root.render(<App />);
-</script>
-</body>
-</html>
+<div id="splash-overlay">
+  <div class="splash-particles" id="spark-container"></div>
+  <div class="splash-logo-wrap">
+    <div class="splash-glow"></div>
+    <div class="splash-ring"></div>
+    <div class="splash-ring-2"></div>
+    <div class="splash-ring-3"></div>
+    <img class="splash-logo-img" src="data:image/png;base64,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
