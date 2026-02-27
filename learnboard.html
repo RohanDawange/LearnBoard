@@ -1,0 +1,1092 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>LearnBoard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Rajdhani:wght@400;500;600;700&family=Caveat:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  /* ── RESET & ROOT ── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:        #0a0b0d;
+    --bg2:       #0e1014;
+    --bg3:       #13151a;
+    --panel:     #111318;
+    --border:    #1e2128;
+    --border2:   #262b35;
+    --orange:    #f97316;
+    --orange-d:  #c2570f;
+    --orange-glow: rgba(249,115,22,0.18);
+    --orange-dim:  rgba(249,115,22,0.07);
+    --amber:     #fbbf24;
+    --green:     #22c55e;
+    --red:       #ef4444;
+    --text:      #d4d8e0;
+    --text2:     #6b7280;
+    --text3:     #3a3f4a;
+    --mono:      'JetBrains Mono', monospace;
+    --head:      'Rajdhani', sans-serif;
+    --hand:      'Caveat', cursive;
+  }
+
+  html, body { width: 100%; height: 100%; overflow: hidden; background: var(--bg); }
+
+  body {
+    font-family: var(--mono);
+    color: var(--text);
+    /* subtle scanline texture */
+    background-image:
+      repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(255,255,255,0.012) 2px,
+        rgba(255,255,255,0.012) 4px
+      );
+  }
+
+  #root { width: 100%; height: 100%; display: flex; flex-direction: column; }
+
+  /* ── TOPBAR ── */
+  .topbar {
+    height: 48px;
+    min-height: 48px;
+    background: var(--panel);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    padding: 0 14px;
+    gap: 14px;
+    position: relative;
+    z-index: 50;
+    box-shadow: 0 1px 0 rgba(249,115,22,0.06);
+  }
+
+  .logo {
+    font-family: var(--head);
+    font-weight: 700;
+    font-size: 1.25rem;
+    color: var(--orange);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+    text-shadow: 0 0 20px rgba(249,115,22,0.5);
+  }
+  .logo-icon {
+    width: 22px; height: 22px;
+    background: var(--orange);
+    clip-path: polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%);
+    flex-shrink: 0;
+    box-shadow: 0 0 12px rgba(249,115,22,0.6);
+  }
+  .logo-sep {
+    width: 1px; height: 20px;
+    background: var(--border2);
+    margin: 0 2px;
+    flex-shrink: 0;
+  }
+
+  /* URL Input */
+  .url-form {
+    flex: 1;
+    display: flex;
+    gap: 6px;
+    max-width: 540px;
+  }
+  .url-input {
+    flex: 1;
+    height: 30px;
+    background: var(--bg2);
+    border: 1px solid var(--border2);
+    border-radius: 4px;
+    padding: 0 10px;
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    min-width: 0;
+  }
+  .url-input::placeholder { color: var(--text3); }
+  .url-input:focus {
+    border-color: var(--orange);
+    box-shadow: 0 0 0 2px var(--orange-glow);
+  }
+  .btn-load {
+    height: 30px;
+    padding: 0 14px;
+    background: var(--orange);
+    border: none;
+    border-radius: 4px;
+    font-family: var(--head);
+    font-weight: 600;
+    font-size: 0.8rem;
+    letter-spacing: 1px;
+    color: #000;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.15s, box-shadow 0.15s;
+  }
+  .btn-load:hover { background: var(--amber); box-shadow: 0 0 12px var(--orange-glow); }
+  .btn-load:active { transform: scale(0.97); }
+
+  .topbar-right { display: flex; align-items: center; gap: 10px; margin-left: auto; }
+
+  /* ── TIMER ── */
+  .timer-block {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--bg3);
+    border: 1px solid var(--border2);
+    border-radius: 6px;
+    padding: 4px 10px;
+  }
+  .timer-digits {
+    font-family: var(--mono);
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--orange);
+    letter-spacing: 2px;
+    min-width: 62px;
+    text-align: center;
+    text-shadow: 0 0 10px rgba(249,115,22,0.5);
+    transition: color 0.3s;
+  }
+  .timer-digits.paused { color: var(--text2); text-shadow: none; }
+  .timer-btns { display: flex; gap: 4px; }
+  .timer-btn {
+    width: 26px; height: 26px;
+    border-radius: 4px;
+    border: 1px solid var(--border2);
+    background: var(--bg2);
+    color: var(--text2);
+    font-size: 11px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.15s;
+  }
+  .timer-btn:hover { border-color: var(--orange); color: var(--orange); background: var(--orange-dim); }
+  .timer-btn.running { border-color: var(--orange); color: var(--orange); background: var(--orange-dim); }
+  .timer-btn.reset-btn:hover { border-color: var(--red); color: var(--red); background: rgba(239,68,68,0.07); }
+
+  /* ── MAIN SPLIT LAYOUT ── */
+  .workspace {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    overflow: hidden;
+    gap: 0;
+  }
+
+  /* ── VIDEO PANE ── */
+  .video-pane {
+    background: #000;
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
+  }
+  .video-embed {
+    flex: 1;
+    position: relative;
+    background: #000;
+  }
+  .video-embed iframe {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: none;
+    display: block;
+  }
+  .video-placeholder {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    background: var(--bg2);
+  }
+  .placeholder-art {
+    width: 80px; height: 80px;
+    border: 2px solid var(--border2);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    position: relative;
+  }
+  .placeholder-art::before {
+    content: '';
+    position: absolute; inset: -8px;
+    border-radius: 50%;
+    border: 1px dashed var(--border2);
+    animation: spin 12s linear infinite;
+  }
+  .placeholder-art::after {
+    content: '';
+    position: absolute; inset: -18px;
+    border-radius: 50%;
+    border: 1px dotted var(--border);
+    animation: spin 20s linear infinite reverse;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .play-triangle {
+    width: 0; height: 0;
+    border-top: 16px solid transparent;
+    border-bottom: 16px solid transparent;
+    border-left: 28px solid var(--orange);
+    margin-left: 6px;
+    filter: drop-shadow(0 0 8px rgba(249,115,22,0.5));
+  }
+  .placeholder-label {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    color: var(--text3);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    text-align: center;
+    line-height: 1.8;
+  }
+  .placeholder-label strong { color: var(--text2); }
+
+  /* video footer */
+  .video-footer {
+    height: 36px;
+    min-height: 36px;
+    background: var(--panel);
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    padding: 0 12px;
+    gap: 8px;
+  }
+  .vf-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--text3);
+    flex-shrink: 0;
+  }
+  .vf-dot.live { background: var(--green); box-shadow: 0 0 6px var(--green); animation: blink 1.6s ease-in-out infinite; }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+  .vf-label {
+    font-size: 0.65rem;
+    color: var(--text2);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex: 1;
+  }
+
+  /* ── NOTEPAD PANE ── */
+  .notepad-pane {
+    background: var(--bg2);
+    border-left: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .notepad-header {
+    height: 44px;
+    min-height: 44px;
+    background: var(--panel);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    padding: 0 14px;
+    gap: 10px;
+    flex-shrink: 0;
+  }
+  .notepad-header-title {
+    font-family: var(--head);
+    font-weight: 700;
+    font-size: 0.85rem;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    color: var(--orange);
+    text-shadow: 0 0 16px rgba(249,115,22,0.4);
+    display: flex;
+    align-items: center;
+    gap: 7px;
+  }
+  .notepad-header-title svg { flex-shrink: 0; }
+
+  .notepad-tabs {
+    display: flex;
+    background: var(--bg3);
+    border-bottom: 1px solid var(--border);
+    overflow-x: auto;
+    flex-shrink: 0;
+    gap: 0;
+  }
+  .notepad-tabs::-webkit-scrollbar { height: 0; }
+
+  .np-tab {
+    height: 30px;
+    padding: 0 12px;
+    font-family: var(--mono);
+    font-size: 0.6rem;
+    letter-spacing: 1px;
+    color: var(--text3);
+    border: none;
+    border-right: 1px solid var(--border);
+    background: transparent;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .np-tab:hover { color: var(--text2); background: var(--bg2); }
+  .np-tab.active {
+    color: var(--orange);
+    background: var(--bg2);
+    border-bottom: 2px solid var(--orange);
+  }
+  .np-tab-x {
+    width: 13px; height: 13px;
+    border-radius: 3px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 9px;
+    opacity: 0;
+    transition: opacity 0.15s, color 0.15s, background 0.15s;
+    color: var(--text3);
+  }
+  .np-tab:hover .np-tab-x { opacity: 1; }
+  .np-tab-x:hover { color: var(--red); background: rgba(239,68,68,0.12); }
+  .np-tab-add {
+    height: 30px;
+    padding: 0 12px;
+    font-size: 1rem;
+    line-height: 1;
+    color: var(--text3);
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    transition: color 0.15s;
+    flex-shrink: 0;
+    display: flex; align-items: center;
+  }
+  .np-tab-add:hover { color: var(--orange); }
+
+  /* The actual writing area */
+  .notepad-body {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Paper lines bg */
+  .notepad-body::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      repeating-linear-gradient(
+        transparent,
+        transparent 31px,
+        rgba(249, 115, 22, 0.06) 31px,
+        rgba(249, 115, 22, 0.06) 32px
+      );
+    background-attachment: local;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* left margin red line */
+  .notepad-body::after {
+    content: '';
+    position: absolute;
+    top: 0; bottom: 0;
+    left: 42px;
+    width: 1px;
+    background: rgba(239, 68, 68, 0.18);
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  .np-textarea {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    background: transparent;
+    border: none;
+    outline: none;
+    resize: none;
+    padding: 10px 16px 16px 56px;
+    font-family: var(--hand);
+    font-size: 1.2rem;
+    font-weight: 500;
+    line-height: 32px;
+    color: #e8dcc8;
+    caret-color: var(--orange);
+    overflow-y: auto;
+    position: relative;
+    z-index: 2;
+    letter-spacing: 0.3px;
+  }
+  .np-textarea::placeholder {
+    color: var(--text3);
+    font-family: var(--hand);
+    font-size: 1.1rem;
+    font-style: italic;
+    line-height: 32px;
+  }
+  .np-textarea::-webkit-scrollbar { width: 4px; }
+  .np-textarea::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+  /* Footer */
+  .notepad-footer {
+    height: 36px;
+    min-height: 36px;
+    background: var(--panel);
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    padding: 0 14px;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+  .np-save-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--text3);
+    flex-shrink: 0;
+    transition: background 0.3s, box-shadow 0.3s;
+  }
+  .np-save-dot.saved {
+    background: var(--green);
+    box-shadow: 0 0 6px var(--green);
+  }
+  .np-meta {
+    font-size: 0.6rem;
+    color: var(--text3);
+    letter-spacing: 1px;
+  }
+  .np-meta span { color: var(--text2); }
+
+  .np-actions { display: flex; align-items: center; gap: 6px; margin-left: auto; }
+
+  .np-btn {
+    height: 24px;
+    padding: 0 10px;
+    border-radius: 4px;
+    border: 1px solid var(--border2);
+    background: transparent;
+    font-family: var(--mono);
+    font-size: 0.6rem;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: all 0.15s;
+    display: flex; align-items: center; gap: 5px;
+    white-space: nowrap;
+  }
+  .np-btn-download {
+    color: var(--orange);
+    border-color: var(--orange-d);
+    background: var(--orange-dim);
+  }
+  .np-btn-download:hover {
+    background: var(--orange);
+    color: #000;
+    box-shadow: 0 0 10px var(--orange-glow);
+  }
+  .np-btn-pdf {
+    color: #f43f5e;
+    border-color: #7f1d1d;
+    background: rgba(244, 63, 94, 0.07);
+  }
+  .np-btn-pdf:hover {
+    background: #f43f5e;
+    border-color: #f43f5e;
+    color: #fff;
+    box-shadow: 0 0 10px rgba(244,63,94,0.3);
+  }
+  .np-btn-clear {
+    color: var(--text3);
+  }
+  .np-btn-clear:hover { border-color: var(--red); color: var(--red); background: rgba(239,68,68,0.06); }
+
+  /* ── SCROLLBAR ── */
+  ::-webkit-scrollbar { width: 4px; height: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+  /* ── STATUS BADGE ── */
+  .status-badge {
+    font-size: 0.6rem;
+    color: var(--text3);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 2px 6px;
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    background: var(--bg3);
+    white-space: nowrap;
+  }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<script type="text/babel">
+const { useState, useEffect, useRef, useCallback } = React;
+
+// ─── UTILS ───────────────────────────────────────────
+function extractVideoId(url) {
+  const patterns = [
+    /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/|youtube\.com\/shorts\/)([^&?/\s]+)/,
+  ];
+  for (const p of patterns) {
+    const m = url.match(p);
+    if (m) return m[1];
+  }
+  return null;
+}
+
+function fmtTimer(s) {
+  const h = Math.floor(s / 3600);
+  const m = Math.floor((s % 3600) / 60);
+  const sec = s % 60;
+  if (h > 0) return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;
+  return `${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;
+}
+
+// ─── STORAGE ─────────────────────────────────────────
+const LS_VIDEO = 'learnboard_video_v2';
+function loadSavedVideo() {
+  try { return localStorage.getItem(LS_VIDEO) || ''; } catch { return ''; }
+}
+function saveVideo(url) {
+  try { localStorage.setItem(LS_VIDEO, url); } catch {}
+}
+
+// ─── TIMER ───────────────────────────────────────────
+function Timer() {
+  const [seconds, setSeconds] = useState(0);
+  const [running, setRunning] = useState(false);
+  const interval = useRef(null);
+
+  useEffect(() => {
+    if (running) {
+      interval.current = setInterval(() => setSeconds(s => s + 1), 1000);
+    } else {
+      clearInterval(interval.current);
+    }
+    return () => clearInterval(interval.current);
+  }, [running]);
+
+  const toggle = () => setRunning(r => !r);
+  const reset  = () => { setRunning(false); setSeconds(0); };
+
+  return (
+    <div className="timer-block">
+      <div className={`timer-digits${running ? '' : ' paused'}`}>{fmtTimer(seconds)}</div>
+      <div className="timer-btns">
+        <button
+          className={`timer-btn${running ? ' running' : ''}`}
+          onClick={toggle}
+          title={running ? 'Pause' : 'Start'}
+        >
+          {running
+            ? <svg width="10" height="10" viewBox="0 0 10 10"><rect x="1" y="1" width="3" height="8" fill="currentColor"/><rect x="6" y="1" width="3" height="8" fill="currentColor"/></svg>
+            : <svg width="10" height="10" viewBox="0 0 10 10"><polygon points="1,0 10,5 1,10" fill="currentColor"/></svg>
+          }
+        </button>
+        <button className="timer-btn reset-btn" onClick={reset} title="Reset">
+          <svg width="10" height="10" viewBox="0 0 12 12">
+            <path d="M6 2a4 4 0 1 0 3.5 6" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
+            <polyline points="9,1 9,4 6,4" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ─── NOTEPAD ─────────────────────────────────────────
+const LS_NOTES = 'learnboard_notes_v3';
+
+function loadNotes() {
+  try {
+    const raw = localStorage.getItem(LS_NOTES);
+    return raw ? JSON.parse(raw) : [{ id: 1, title: 'Note 1', body: '' }];
+  } catch { return [{ id: 1, title: 'Note 1', body: '' }]; }
+}
+function persistNotes(tabs) {
+  try { localStorage.setItem(LS_NOTES, JSON.stringify(tabs)); } catch {}
+}
+
+function Notepad() {
+  const [tabs,     setTabs]     = useState(() => loadNotes());
+  const [activeId, setActiveId] = useState(() => loadNotes()[0]?.id ?? 1);
+  const [savedDot, setSavedDot] = useState(false);
+  const saveTimer = useRef(null);
+  const nextId    = useRef(Math.max(...loadNotes().map(t => t.id)) + 1);
+
+  useEffect(() => {
+    clearTimeout(saveTimer.current);
+    saveTimer.current = setTimeout(() => {
+      persistNotes(tabs);
+      setSavedDot(true);
+      setTimeout(() => setSavedDot(false), 1400);
+    }, 500);
+  }, [tabs]);
+
+  const activeTab = tabs.find(t => t.id === activeId) || tabs[0];
+
+  function updateBody(val) {
+    setTabs(prev => prev.map(t => t.id === activeId ? { ...t, body: val } : t));
+  }
+
+  function addTab() {
+    const id = nextId.current++;
+    const label = `Note ${tabs.length + 1}`;
+    setTabs(prev => [...prev, { id, title: label, body: '' }]);
+    setActiveId(id);
+  }
+
+  function deleteTab(id, e) {
+    e.stopPropagation();
+    setTabs(prev => {
+      const next = prev.filter(t => t.id !== id);
+      if (next.length === 0) {
+        const fresh = { id: nextId.current++, title: 'Note 1', body: '' };
+        setActiveId(fresh.id);
+        return [fresh];
+      }
+      if (activeId === id) setActiveId(next[next.length - 1].id);
+      return next;
+    });
+  }
+
+  function clearCurrent() {
+    if (!activeTab?.body.trim()) return;
+    if (!confirm('Clear this note?')) return;
+    updateBody('');
+  }
+
+  function downloadTxt() {
+    const body = activeTab?.body ?? '';
+    const title = activeTab?.title ?? 'note';
+    const blob = new Blob([body], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${title.replace(/\s+/g, '_')}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function downloadAllTxt() {
+    const content = tabs.map(t => `=== ${t.title} ===\n\n${t.body}`).join('\n\n\n');
+    const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'learnboard_notes.txt';
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function downloadPdf() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+    const title = activeTab?.title ?? 'Note';
+    const body  = activeTab?.body  ?? '';
+
+    const pageW  = doc.internal.pageSize.getWidth();
+    const pageH  = doc.internal.pageSize.getHeight();
+    const margin = 18;
+    const usableW = pageW - margin * 2;
+    let y = margin;
+
+    // ── background
+    doc.setFillColor(13, 15, 20);
+    doc.rect(0, 0, pageW, pageH, 'F');
+
+    // ── orange accent bar at top
+    doc.setFillColor(249, 115, 22);
+    doc.rect(0, 0, pageW, 8, 'F');
+
+    // ── header box
+    doc.setFillColor(17, 19, 24);
+    doc.rect(0, 8, pageW, 22, 'F');
+
+    // ── LearnBoard brand text
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(9);
+    doc.setTextColor(249, 115, 22);
+    doc.text('LEARNBOARD', margin, 16);
+
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(7);
+    doc.setTextColor(90, 98, 117);
+    doc.text(`Generated: ${new Date().toLocaleString()}`, margin, 22);
+
+    // ── Note title
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(18);
+    doc.setTextColor(232, 220, 200);
+    doc.text(title, margin, 36);
+
+    // ── divider line
+    y = 42;
+    doc.setDrawColor(249, 115, 22);
+    doc.setLineWidth(0.4);
+    doc.line(margin, y, pageW - margin, y);
+
+    y = 50;
+
+    // ── ruled line helper
+    const drawRuledLines = (fromY, toY) => {
+      doc.setDrawColor(30, 35, 48);
+      doc.setLineWidth(0.15);
+      for (let ly = fromY; ly < toY; ly += 7) {
+        doc.line(margin, ly, pageW - margin, ly);
+      }
+    };
+
+    // ── body text — split into lines with wrapping
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(11);
+    doc.setTextColor(212, 216, 224);
+
+    const paragraphs = body.split('\n');
+
+    for (let i = 0; i < paragraphs.length; i++) {
+      const para = paragraphs[i];
+
+      // if empty line — add spacing
+      if (!para.trim()) {
+        y += 5;
+        if (y > pageH - margin) {
+          doc.addPage();
+          doc.setFillColor(13, 15, 20);
+          doc.rect(0, 0, pageW, pageH, 'F');
+          y = margin + 10;
+        }
+        continue;
+      }
+
+      // wrap long lines
+      const lines = doc.splitTextToSize(para, usableW);
+      for (const line of lines) {
+        if (y > pageH - margin - 5) {
+          // new page
+          doc.addPage();
+          doc.setFillColor(13, 15, 20);
+          doc.rect(0, 0, pageW, pageH, 'F');
+          // orange left margin line
+          doc.setDrawColor(249, 115, 22, 0.3);
+          doc.setLineWidth(0.3);
+          doc.line(margin - 4, 10, margin - 4, pageH - 10);
+          drawRuledLines(15, pageH - margin);
+          y = margin + 10;
+        }
+        doc.text(line, margin, y);
+        y += 7;
+      }
+    }
+
+    // draw ruled lines on first page content area
+    // (we do this last so it doesn't cover text — use a subtle approach)
+    // Add page numbers
+    const totalPages = doc.internal.getNumberOfPages();
+    for (let p = 1; p <= totalPages; p++) {
+      doc.setPage(p);
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(7);
+      doc.setTextColor(58, 63, 74);
+      doc.text(`${title}  ·  Page ${p} of ${totalPages}`, margin, pageH - 6);
+      doc.setDrawColor(30, 33, 40);
+      doc.setLineWidth(0.3);
+      doc.line(margin, pageH - 10, pageW - margin, pageH - 10);
+    }
+
+    doc.save(`${title.replace(/\s+/g, '_')}.pdf`);
+  }
+
+  function downloadAllPdf() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+    const pageW = doc.internal.pageSize.getWidth();
+    const pageH = doc.internal.pageSize.getHeight();
+    const margin = 18;
+    const usableW = pageW - margin * 2;
+
+    tabs.forEach((tab, tabIdx) => {
+      if (tabIdx > 0) doc.addPage();
+
+      // bg
+      doc.setFillColor(13, 15, 20);
+      doc.rect(0, 0, pageW, pageH, 'F');
+
+      // top bar
+      doc.setFillColor(249, 115, 22);
+      doc.rect(0, 0, pageW, 8, 'F');
+
+      // header
+      doc.setFillColor(17, 19, 24);
+      doc.rect(0, 8, pageW, 22, 'F');
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(9);
+      doc.setTextColor(249, 115, 22);
+      doc.text('LEARNBOARD', margin, 16);
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(7);
+      doc.setTextColor(90, 98, 117);
+      doc.text(`Note ${tabIdx + 1} of ${tabs.length}  ·  ${new Date().toLocaleDateString()}`, margin, 22);
+
+      // title
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(18);
+      doc.setTextColor(232, 220, 200);
+      doc.text(tab.title, margin, 36);
+
+      doc.setDrawColor(249, 115, 22);
+      doc.setLineWidth(0.4);
+      doc.line(margin, 42, pageW - margin, 42);
+
+      let y = 50;
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(11);
+      doc.setTextColor(212, 216, 224);
+
+      const paragraphs = tab.body.split('\n');
+      for (const para of paragraphs) {
+        if (!para.trim()) { y += 5; continue; }
+        const lines = doc.splitTextToSize(para, usableW);
+        for (const line of lines) {
+          if (y > pageH - margin - 5) {
+            doc.addPage();
+            doc.setFillColor(13, 15, 20);
+            doc.rect(0, 0, pageW, pageH, 'F');
+            y = margin + 10;
+          }
+          doc.text(line, margin, y);
+          y += 7;
+        }
+      }
+    });
+
+    // page numbers
+    const totalPages = doc.internal.getNumberOfPages();
+    for (let p = 1; p <= totalPages; p++) {
+      doc.setPage(p);
+      doc.setFontSize(7);
+      doc.setTextColor(58, 63, 74);
+      doc.text(`LearnBoard Notes  ·  Page ${p} of ${totalPages}`, margin, pageH - 6);
+    }
+
+    doc.save('learnboard_all_notes.pdf');
+  }
+
+  const wordCount = activeTab?.body.trim() ? activeTab.body.trim().split(/\s+/).length : 0;
+  const lineCount = activeTab?.body ? activeTab.body.split('\n').length : 0;
+
+  return (
+    <div className="notepad-pane">
+      {/* Header */}
+      <div className="notepad-header">
+        <div className="notepad-header-title">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            <polyline points="14,2 14,8 20,8"/>
+            <line x1="16" y1="13" x2="8" y2="13"/>
+            <line x1="16" y1="17" x2="8" y2="17"/>
+            <polyline points="10,9 9,9 8,9"/>
+          </svg>
+          Notepad
+        </div>
+        <span style={{flex:1}} />
+        <button className="np-btn np-btn-pdf" onClick={downloadAllPdf} title="Download all notes as PDF">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            <polyline points="14,2 14,8 20,8"/>
+          </svg>
+          ALL PDF
+        </button>
+        <button className="np-btn np-btn-download" onClick={downloadAllTxt} title="Download all notes as TXT">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="7,10 12,15 17,10"/>
+            <line x1="12" y1="15" x2="12" y2="3"/>
+          </svg>
+          ALL TXT
+        </button>
+      </div>
+
+      {/* Tabs */}
+      <div className="notepad-tabs">
+        {tabs.map(tab => (
+          <button
+            key={tab.id}
+            className={`np-tab${tab.id === activeId ? ' active' : ''}`}
+            onClick={() => setActiveId(tab.id)}
+          >
+            {tab.title}
+            {tabs.length > 1 && (
+              <span className="np-tab-x" onClick={e => deleteTab(tab.id, e)}>✕</span>
+            )}
+          </button>
+        ))}
+        <button className="np-tab-add" onClick={addTab} title="New tab">＋</button>
+      </div>
+
+      {/* Writing area */}
+      <div className="notepad-body">
+        <textarea
+          key={activeId}
+          className="np-textarea"
+          value={activeTab?.body ?? ''}
+          onChange={e => updateBody(e.target.value)}
+          placeholder={"Write your notes here...\n\nYour handwriting, your thoughts."}
+          spellCheck={false}
+        />
+      </div>
+
+      {/* Footer */}
+      <div className="notepad-footer">
+        <div className={`np-save-dot${savedDot ? ' saved' : ''}`} />
+        <span className="np-meta"><span>{wordCount}</span> words · <span>{lineCount}</span> lines</span>
+        <div className="np-actions">
+          <button className="np-btn np-btn-pdf" onClick={downloadPdf} title="Download as PDF">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14,2 14,8 20,8"/>
+            </svg>
+            PDF
+          </button>
+          <button className="np-btn np-btn-download" onClick={downloadTxt} title="Download as TXT">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="7,10 12,15 17,10"/>
+              <line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+            TXT
+          </button>
+          <button className="np-btn np-btn-clear" onClick={clearCurrent}>CLEAR</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── VIDEO PANE ──────────────────────────────────────
+function VideoPane({ videoId, videoUrl }) {
+  return (
+    <div className="video-pane">
+      <div className="video-embed">
+        {videoId ? (
+          <iframe
+            src={`https://www.youtube.com/embed/${videoId}?autoplay=0&rel=0&modestbranding=1`}
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+            title="LearnBoard Video"
+          />
+        ) : (
+          <div className="video-placeholder">
+            <div className="placeholder-art">
+              <div className="play-triangle" />
+            </div>
+            <div className="placeholder-label">
+              Paste a YouTube URL above<br />
+              <strong>and press LOAD →</strong>
+            </div>
+          </div>
+        )}
+      </div>
+      <div className="video-footer">
+        <div className={`vf-dot${videoId ? ' live' : ''}`} />
+        <div className="vf-label">
+          {videoId ? `youtube.com/watch?v=${videoId}` : 'NO VIDEO LOADED'}
+        </div>
+        <div className="status-badge">{videoId ? 'ACTIVE' : 'IDLE'}</div>
+      </div>
+    </div>
+  );
+}
+
+// ─── APP ─────────────────────────────────────────────
+function App() {
+  const [urlInput, setUrlInput] = useState(() => loadSavedVideo());
+  const [videoId,  setVideoId]  = useState(() => {
+    const saved = loadSavedVideo();
+    return saved ? extractVideoId(saved) : null;
+  });
+
+  function handleLoad(e) {
+    e && e.preventDefault();
+    const id = extractVideoId(urlInput.trim());
+    if (!id) {
+      alert('Could not find a YouTube video ID in that URL.\nPlease paste a valid YouTube link.');
+      return;
+    }
+    setVideoId(id);
+    saveVideo(urlInput.trim());
+  }
+
+  return (
+    <>
+      {/* TOPBAR */}
+      <header className="topbar">
+        <div className="logo">
+          <div className="logo-icon" />
+          LearnBoard
+        </div>
+        <div className="logo-sep" />
+
+        {/* URL Form */}
+        <form className="url-form" onSubmit={handleLoad}>
+          <input
+            className="url-input"
+            type="text"
+            value={urlInput}
+            onChange={e => setUrlInput(e.target.value)}
+            placeholder="Paste YouTube URL → youtube.com/watch?v=..."
+            spellCheck={false}
+          />
+          <button className="btn-load" type="submit">LOAD →</button>
+        </form>
+
+        {/* Right side */}
+        <div className="topbar-right">
+          <Timer />
+        </div>
+      </header>
+
+      {/* WORKSPACE */}
+      <main className="workspace">
+        <VideoPane videoId={videoId} videoUrl={urlInput} />
+        <Notepad />
+      </main>
+    </>
+  );
+}
+
+// ─── MOUNT ───────────────────────────────────────────
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(<App />);
+</script>
+</body>
+</html>
