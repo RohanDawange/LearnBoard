@@ -10,6 +10,7 @@
 <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
 <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -262,6 +263,164 @@ body{font-family:var(--mono);color:var(--text);
 ::-webkit-scrollbar{width:4px;}
 ::-webkit-scrollbar-track{background:transparent;}
 ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px;}
+
+/* ── PRINT CONTAINER (hidden, used for PDF rendering) ── */
+#pdf-render-zone {
+  position: fixed;
+  left: -9999px;
+  top: 0;
+  width: 794px; /* A4 at 96dpi */
+  background: #0a0b0d;
+  font-family: 'Caveat', cursive;
+  color: #e8dcc8;
+  padding: 0;
+  z-index: -1;
+  pointer-events: none;
+}
+.pdf-page {
+  width: 794px;
+  min-height: 1123px;
+  background: #0a0b0d;
+  padding: 54px 64px 60px;
+  position: relative;
+  page-break-after: always;
+  box-sizing: border-box;
+}
+.pdf-top-bar {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 8px;
+  background: #f97316;
+}
+.pdf-header-band {
+  position: absolute;
+  top: 8px; left: 0; right: 0;
+  height: 26px;
+  background: #111318;
+  display: flex; align-items: center;
+  padding: 0 64px;
+  gap: 0;
+}
+.pdf-header-app {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 9px; font-weight: 700;
+  color: #f97316; letter-spacing: 2px;
+}
+.pdf-header-meta {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 7px; color: #5a6275;
+  margin-left: 14px;
+}
+.pdf-content {
+  margin-top: 34px;
+}
+.pdf-note-title {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 28px; font-weight: 700;
+  color: #e8dcc8; letter-spacing: 2px;
+  margin-bottom: 6px;
+  line-height: 1.2;
+}
+.pdf-tags {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; color: #f97316;
+  margin-bottom: 10px;
+}
+.pdf-divider {
+  border: none;
+  border-top: 1px solid #f97316;
+  margin: 10px 0 18px;
+}
+.pdf-body {
+  font-family: 'Caveat', cursive;
+  font-size: 17px;
+  line-height: 1.85;
+  color: #e8dcc8;
+}
+.pdf-body h1 {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 26px; font-weight: 700;
+  color: #e8dcc8; letter-spacing: 2px;
+  margin: 18px 0 6px;
+  padding-bottom: 5px;
+  border-bottom: 1px solid rgba(249,115,22,0.5);
+}
+.pdf-body h2 {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 20px; font-weight: 600;
+  color: #d4d8e0; letter-spacing: 1px;
+  margin: 14px 0 5px;
+}
+.pdf-body h3 {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 16px; font-weight: 600;
+  color: #f97316; letter-spacing: 1px;
+  margin: 10px 0 4px;
+}
+.pdf-body p { margin-bottom: 8px; }
+.pdf-body strong, .pdf-body b { color: #fff; font-weight: 700; }
+.pdf-body em, .pdf-body i { color: #b4bac8; font-style: italic; }
+.pdf-body u { text-decoration: underline; }
+.pdf-body ul {
+  margin: 6px 0 6px 4px;
+  list-style: none;
+  padding: 0;
+}
+.pdf-body ul li::before { content: "▸ "; color: #f97316; }
+.pdf-body ol { margin: 6px 0 6px 20px; }
+.pdf-body ol li { margin-bottom: 3px; }
+.pdf-body pre {
+  background: #080a0c;
+  border: 1px solid #262b35;
+  border-left: 3px solid #f97316;
+  border-radius: 4px;
+  padding: 10px 14px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: #86efac;
+  overflow: hidden;
+  margin: 10px 0;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+.pdf-body code {
+  background: rgba(249,115,22,0.12);
+  border: 1px solid rgba(249,115,22,0.25);
+  border-radius: 3px;
+  padding: 1px 5px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  color: #f97316;
+}
+.pdf-body pre code {
+  background: transparent; border: none; padding: 0;
+  color: #86efac; font-size: 11px;
+}
+.pdf-body blockquote {
+  border-left: 3px solid #f97316;
+  padding-left: 14px;
+  margin: 8px 0;
+  color: #6b7280;
+  font-style: italic;
+}
+.pdf-footer {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 20px;
+  background: #111318;
+  display: flex; align-items: center;
+  padding: 0 64px;
+  justify-content: space-between;
+}
+.pdf-footer-text {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 7px; color: #3a3f4a;
+}
+.pdf-footer-page {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 7px; color: #f97316;
+}
+
 </style>
 </head>
 <body>
@@ -937,38 +1096,99 @@ function App(){
   }
 
   function exportPDF(note){
-    const {jsPDF}=window.jspdf;
-    const doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
-    const pW=210,pH=297,m=18,uw=pW-m*2;
-    doc.setFillColor(13,15,20);doc.rect(0,0,pW,pH,'F');
-    doc.setFillColor(249,115,22);doc.rect(0,0,pW,8,'F');
-    doc.setFont('helvetica','bold');doc.setFontSize(9);doc.setTextColor(249,115,22);
-    doc.text('LEARNBOARD',m,16);
-    doc.setFont('helvetica','normal');doc.setFontSize(7);doc.setTextColor(90,98,117);
-    doc.text(`${activeNB?.name||''}  ·  ${new Date(note.updated).toLocaleDateString()}  ·  Progress: ${note.progress}%`,m,22);
-    doc.setFont('helvetica','bold');doc.setFontSize(18);doc.setTextColor(232,220,200);
-    doc.text(note.title,m,36);
-    if(note.tags.length){
-      doc.setFontSize(8);doc.setTextColor(249,115,22);
-      doc.text('Tags: '+note.tags.join(' · '),m,43);
-    }
-    doc.setDrawColor(249,115,22);doc.setLineWidth(0.4);doc.line(m,47,pW-m,47);
-    const tmp=document.createElement('div');tmp.innerHTML=note.content;
-    const text=tmp.innerText;
-    let y=56;
-    doc.setFont('helvetica','normal');doc.setFontSize(11);doc.setTextColor(212,216,224);
-    const paras=text.split('\n');
-    for(const p of paras){
-      if(!p.trim()){y+=4;continue;}
-      const lines=doc.splitTextToSize(p,uw);
-      for(const l of lines){
-        if(y>pH-m){doc.addPage();doc.setFillColor(13,15,20);doc.rect(0,0,pW,pH,'F');y=m+10;}
-        doc.text(l,m,y);y+=7;
-      }
-    }
-    const tp=doc.internal.getNumberOfPages();
-    for(let i=1;i<=tp;i++){doc.setPage(i);doc.setFontSize(7);doc.setTextColor(58,63,74);doc.text(`LearnBoard · ${note.title} · Page ${i} of ${tp}`,m,pH-6);}
-    doc.save(`${note.title.replace(/\s+/g,'_')}.pdf`);
+    const title = note.title || 'note';
+    const nbName = activeNB?.name || 'Notebook';
+
+    // ── Build hidden render zone ──
+    let zone = document.getElementById('pdf-render-zone');
+    if(zone) zone.remove();
+    zone = document.createElement('div');
+    zone.id = 'pdf-render-zone';
+
+    const dateStr = new Date(note.updated).toLocaleDateString();
+    const tagsStr = note.tags && note.tags.length ? note.tags.map(t=>'#'+t).join('  ') : '';
+
+    zone.innerHTML = `
+      <div class="pdf-page">
+        <div class="pdf-top-bar"></div>
+        <div class="pdf-header-band">
+          <span class="pdf-header-app">LEARNBOARD</span>
+          <span class="pdf-header-meta">${nbName}  ·  ${dateStr}  ·  Progress: ${note.progress||0}%</span>
+        </div>
+        <div class="pdf-content">
+          <div class="pdf-note-title">${title}</div>
+          ${tagsStr ? `<div class="pdf-tags">${tagsStr}</div>` : ''}
+          <hr class="pdf-divider"/>
+          <div class="pdf-body">${note.content||'<p>Empty note.</p>'}</div>
+        </div>
+        <div class="pdf-footer">
+          <span class="pdf-footer-text">LearnBoard  ·  ${title}</span>
+          <span class="pdf-footer-page">Page 1</span>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(zone);
+
+    // Wait for fonts to load then capture
+    document.fonts.ready.then(() => {
+      setTimeout(() => {
+        const page = zone.querySelector('.pdf-page');
+        html2canvas(page, {
+          scale: 2,
+          useCORS: true,
+          backgroundColor: '#0a0b0d',
+          logging: false,
+          width: 794,
+          height: Math.max(1123, page.scrollHeight),
+        }).then(canvas => {
+          const {jsPDF} = window.jspdf;
+          const imgData = canvas.toDataURL('image/jpeg', 0.95);
+          const canvasW = canvas.width;
+          const canvasH = canvas.height;
+
+          // A4 dimensions
+          const pW = 210, pH = 297;
+          // How many A4 pages do we need?
+          const pxPerPage = Math.round(canvasW * (297 / 210)); // canvas px for one A4 height
+          const totalPages = Math.ceil(canvasH / pxPerPage);
+
+          const doc = new jsPDF({ orientation:'portrait', unit:'mm', format:'a4', compress:true });
+
+          for(let p = 0; p < totalPages; p++){
+            if(p > 0) doc.addPage();
+
+            // Crop canvas for this page
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = canvasW;
+            tempCanvas.height = pxPerPage;
+            const ctx = tempCanvas.getContext('2d');
+            ctx.fillStyle = '#0a0b0d';
+            ctx.fillRect(0, 0, canvasW, pxPerPage);
+            ctx.drawImage(canvas, 0, -(p * pxPerPage));
+
+            // Update page number in footer area (bottom 40px approx)
+            ctx.fillStyle = '#111318';
+            ctx.fillRect(0, pxPerPage - 40, canvasW, 40);
+            ctx.font = '14px JetBrains Mono';
+            ctx.fillStyle = '#3a3f4a';
+            ctx.fillText(`LearnBoard  ·  ${title}`, 30, pxPerPage - 12);
+            ctx.fillStyle = '#f97316';
+            ctx.textAlign = 'right';
+            ctx.fillText(`${p+1} / ${totalPages}`, canvasW - 30, pxPerPage - 12);
+
+            const pageImg = tempCanvas.toDataURL('image/jpeg', 0.95);
+            doc.addImage(pageImg, 'JPEG', 0, 0, pW, pH);
+          }
+
+          doc.save(`${title.replace(/\s+/g,'_')}.pdf`);
+          zone.remove();
+        }).catch(err => {
+          console.error('html2canvas error:', err);
+          zone.remove();
+          alert('PDF generation failed. Please try again.');
+        });
+      }, 300);
+    });
   }
 
   function dl(blob,name){
